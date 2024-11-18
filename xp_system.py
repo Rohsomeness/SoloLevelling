@@ -6,7 +6,7 @@ from email_client import EmailClient
 
 class XPSystem:
     """XP System for the player"""
-    def __init__(self):
+    def __init__(self, filename="test.pkl"):
         self.total_xp = 0
         self.level = 0
         self.unlocked_titles = ["Tester"]
@@ -60,7 +60,7 @@ class XPSystem:
             150: "Dreamer",
             200: "Player"
         }
-        self.filename = "rdas_stats.pkl"
+        self.filename = filename
 
     def send_message(self, msg: str):
         """Send string message"""
@@ -165,7 +165,7 @@ class XPSystem:
                 return xp_system
         except FileNotFoundError:
             print("No previous progress found. Starting fresh.")
-            return XPSystem()  # Return a new XPSystem instance if no file exists
+            return XPSystem(filename)  # Return a new XPSystem instance if no file exists
 
 
 if __name__ == "__main__":
