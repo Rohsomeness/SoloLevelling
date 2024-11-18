@@ -1,6 +1,6 @@
 import time
 
-from email_client import EmailClient
+from email_client import DiscordClient
 from xp_system import XPSystem
 
 
@@ -15,7 +15,7 @@ class ApolloXPController:
             xp_system (XPSystem): An instance of the XPSystem class.
             poll_interval (int): Time interval (in seconds) for polling emails.
         """
-        self.email_client = EmailClient()
+        self.email_client = DiscordClient()
         self.filename = "rdas_player.pkl"
         self.xp_system = XPSystem.load_progress(self.filename)
         self.poll_interval_s = 30

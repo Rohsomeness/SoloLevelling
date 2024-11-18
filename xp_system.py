@@ -1,7 +1,7 @@
 """XP System for player"""
 import pickle
 
-from email_client import EmailClient
+from email_client import DiscordClient
 
 
 class XPSystem:
@@ -65,7 +65,7 @@ class XPSystem:
     def send_message(self, msg: str):
         """Send string message"""
         print(msg)
-        EmailClient().send_message(msg)
+        DiscordClient().send_message(msg)
 
     def level_up(self) -> str:
         """See if user has levelled up or not"""

@@ -5,10 +5,11 @@ import os
 import csv
 import email
 from email.header import decode_header
-import imaplib
-import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import imaplib
+import requests
+import smtplib
 
 
 EMAIL_CSV = "emails.csv"
@@ -98,6 +99,7 @@ class EmailClient:
     def fetch_and_store_emails(self):
         """Fetch and process emails from Gmail."""
         mail = None
+        new_messages = []
         try:
             # Connect to Gmail's IMAP server
             mail = self.connect_to_email()
@@ -116,6 +118,7 @@ class EmailClient:
                             if os.getenv("EXPECTED_SENDER") in parsed_email["sender"]:
                                 if not self.email_already_logged(parsed_email["timestamp"]):
                                     self.save_to_csv(parsed_email)
+                                    new_messages.append(parsed_email["message"])
                                     print(f"Saved email from {parsed_email['sender']} at time {parsed_email['timestamp']}")
                                 else:
                                     print(f"Got duplicate email with timestamp {parsed_email['timestamp']}, breaking loop")
@@ -129,6 +132,7 @@ class EmailClient:
         finally:
             if mail:
                 mail.logout()
+            return new_messages
 
     def connect_smtp(self):
         """Connect to the SMTP server."""
@@ -166,6 +170,19 @@ class EmailClient:
             print(f"Failed to send message: {e}")
 
 
+class DiscordClient(EmailClient):
+    """Use discord to send messages instead of text"""
+
+    def send_message(self, body: str, subject: str = ""):
+        data = {"content": body}
+        response = requests.post(
+            os.environ["DISCORD_WEBHOOK"],
+            json=data,
+            timeout=10,
+        )
+        if response.status_code != 204:
+            print("Failed to send message")
+
+
 if __name__ == "__main__":
-    # EmailClient().fetch_and_store_emails()
     EmailClient().send_message("Test sending a messagem2")
