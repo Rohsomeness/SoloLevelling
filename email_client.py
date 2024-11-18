@@ -6,13 +6,17 @@ import csv
 import email
 from email.header import decode_header
 import imaplib
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 EMAIL_CSV = "emails.csv"
 IMAP_SERVER = "imap.gmail.com"
+SMTP_SERVER = "smtp.gmail.com"
 
 
-class EmailScraper:
+class EmailClient:
     """Scrape emails from email account"""
 
     def connect_to_email(self) -> imaplib.IMAP4_SSL:
@@ -126,6 +130,42 @@ class EmailScraper:
             if mail:
                 mail.logout()
 
+    def connect_smtp(self):
+        """Connect to the SMTP server."""
+        try:
+            server = smtplib.SMTP(SMTP_SERVER, 587)
+            server.starttls()
+            server.login(os.environ["EMAIL_USERNAME"], os.environ["EMAIL_PASSWORD"])
+            return server
+        except Exception as e:
+            print(f"Failed to connect to SMTP server: {e}")
+            return None
+
+    def send_message(self, body: str, subject: str = ""):
+        """Send an email message."""
+        try:
+            # Set up the server and login
+            server = self.connect_smtp()
+            if server is None:
+                print("Failed to send email. SMTP server connection error.")
+                return
+
+            # Create email message
+            message = MIMEMultipart()
+            message["From"] = os.environ["EMAIL_USERNAME"]
+            message["To"] = os.environ["EXPECTED_SENDER"]
+            message["Subject"] = subject
+            message.attach(MIMEText(body, "plain"))
+
+            # Send the email
+            server.sendmail(os.environ["EMAIL_USERNAME"], os.environ["EXPECTED_SENDER"], message.as_string())
+            server.quit()
+
+            print(f"Message sent to {os.environ['EXPECTED_SENDER']}")
+        except Exception as e:
+            print(f"Failed to send message: {e}")
+
 
 if __name__ == "__main__":
-    EmailScraper().fetch_and_store_emails()
+    # EmailClient().fetch_and_store_emails()
+    EmailClient().send_message("Test sending a messagem2")
