@@ -1,6 +1,7 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from xp_system import XPSystem
+
 
 class TestXPSystem(unittest.TestCase):
 
@@ -62,6 +63,7 @@ class TestXPSystem(unittest.TestCase):
         self.xp_system.save_progress('test_save.pkl')
         loaded_system = XPSystem.load_progress('test_save.pkl')
         self.assertEqual(loaded_system.total_xp, 100)
+
 
 if __name__ == '__main__':
     unittest.main()

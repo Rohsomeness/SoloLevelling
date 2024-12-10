@@ -124,16 +124,16 @@ class XPSystem:
             self.actions[action]["subskill"]
         )
         self.save_progress(self.filename)
-    
+
     def show_actions(self, skill: str):
         if skill not in self.skills_xp:
             return self.send_message("Requested skill does not exist")
         skill_actions = f"All actions for skill {skill}:\n"
         for action, metadata in self.actions.items():
             if metadata["skill"] == skill:
-                skill_actions += f"\t{action}: {metadata["xp"]} XP\n"
+                skill_actions += f"\t{action}: {metadata['xp']} XP\n"
         self.send_message(skill_actions)
-    
+
     def show_level(self):
         """Show level"""
         status = f"Current Level: {self.level} | Total XP: {self.total_xp}"
