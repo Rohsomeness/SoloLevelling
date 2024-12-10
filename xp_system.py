@@ -27,19 +27,23 @@ class XPSystem:
                 "piano": 0,
                 "violin": 0,
                 "performing": 0,
+                "general": 0,
             },
             "social": {
                 "dating": 0,
                 "friends": 0,
                 "job": 0,
+                "general": 0,
             },
             "physical": {
                 "strength": 0,
                 "sports": 0,
+                "general": 0,
             },
             "life": {
                 "chores": 0,
                 "money": 0,
+                "general": 0,
             }
         }
         self.actions = {
@@ -75,13 +79,16 @@ class XPSystem:
             self.level += 1
             self.send_message("Level Up!\n")
         if self.level in [1, 5, 10, 15, 25, 50, 75, 100, 150, 200]:
-            self.unlocked_titles.append(self.level_titles[self.level])
-            self.title = self.unlocked_titles[-1]
-            self.send_message(f"Unlocked new title: {self.title}")
+            if self.level_titles[self.level] not in self.unlocked_titles:
+                self.unlocked_titles.append(self.level_titles[self.level])
+                self.title = self.unlocked_titles[-1]
+                self.send_message(f"Unlocked new title: {self.title}")
 
     def equip_title(self, title: str):
         """Change title"""
-        if title in self.unlocked_titles:
+        if title == "":
+            self.send_message(f"Current title: {title}")
+        elif title in self.unlocked_titles:
             self.title = title
             self.send_message(f"Updated title to {title}")
         else:
@@ -117,6 +124,29 @@ class XPSystem:
             self.actions[action]["subskill"]
         )
         self.save_progress(self.filename)
+    
+    def show_actions(self, skill: str):
+        if skill not in self.skills_xp:
+            return self.send_message("Requested skill does not exist")
+        skill_actions = f"All actions for skill {skill}:\n"
+        for action, metadata in self.actions.items():
+            if metadata["skill"] == skill:
+                skill_actions += f"\t{action}: {metadata["xp"]} XP\n"
+        self.send_message(skill_actions)
+    
+    def show_level(self):
+        """Show level"""
+        status = f"Current Level: {self.level} | Total XP: {self.total_xp}"
+        status += (f"\nEquipped Title: {self.title}")
+        self.send_message(status)
+
+    def display_concise_output(self):
+        """Show concise output"""
+        status = f"Current Level: {self.level} | Total XP: {self.total_xp}"
+        status += (f"\nEquipped Title: {self.title}")
+        for skill, xp in self.skills_xp.items():
+            status += (f"\n\t{skill.capitalize()} Skill XP: {xp}")
+        self.send_message(status)
 
     def __str__(self) -> str:
         """Display the current status of XP and levels."""
@@ -137,12 +167,26 @@ class XPSystem:
     def process_message(self, msg: str) -> None:
         """process an input text message"""
         print(f"Input: {msg}")
-        if "!help" in msg:
+        if len(msg) > 100:
+            print("Command too long to be processed")
+        elif "!help" in msg:
             self.send_message(
-                "List of messages:\n!status\n!add\n!title\n{action}"
+                "List of messages:\n"
+                + "!status - show concise status\n"
+                + "!status full - show full status of skill tree\n"
+                + "!add <skill> <subskill> <xp> <action name> - register action\n"
+                + "!title - change title\n"
+                + "!level - display current level and title\n"
+                + "!action <skill> - display all registered actions for a skill\n"
+                + "<action> - log action\n"
             )
         elif "!status" in msg:
-            self.send_message(str(self))
+            if "full" in msg:
+                self.send_message(str(self))
+            else:
+                self.display_concise_output()
+        elif "!level" in msg:
+            self.show_level()
         elif "!add" in msg:
             msg = msg.split("!add ", 1)[-1]
             skill, subskill, xp, action = msg.split(" ", 3)
@@ -150,6 +194,9 @@ class XPSystem:
             self.add_action(skill, subskill, xp, action)
         elif "!title" in msg:
             self.equip_title(msg.split(" ", 1)[-1])
+        elif "!action" in msg:
+            skill = msg.split("!action ", 1)[-1]
+            self.show_actions(skill)
         elif msg in self.actions:
             self.performed_action(msg)
         else:

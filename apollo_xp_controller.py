@@ -18,7 +18,7 @@ class ApolloXPController:
         self.email_client = DiscordClient()
         self.filename = "rdas_player.pkl"
         self.xp_system = XPSystem.load_progress(self.filename)
-        self.poll_interval_s = 30
+        self.poll_interval_s = 10
 
     def run(self):
         """Run program"""
