@@ -1,3 +1,4 @@
 imapclient
 mail-parser
 flake8 # linting
+requests
